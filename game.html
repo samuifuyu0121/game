@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瘋狂喝麥香紅茶</title>
+  <style>
+    :root {
+      --ink: #3b2a1f;
+      --cream: #fff8da;
+      --yellow: #ffd83d;
+      --orange: #ff9e2c;
+      --tea: #8a451d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,255,255,.9) 0 38px, transparent 39px),
+        radial-gradient(circle at 84% 12%, rgba(255,255,255,.75) 0 24px, transparent 25px),
+        linear-gradient(180deg, #73c8d5 0 58%, #91cf75 58% 100%);
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+    }
+
+    .sun {
+      position: fixed;
+      top: 42px;
+      right: 8%;
+      width: 90px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #fff4a3;
+      box-shadow: 0 0 35px rgba(255, 244, 163, .95);
+    }
+
+    .cloud {
+      position: fixed;
+      width: 120px;
+      height: 34px;
+      border-radius: 40px;
+      background: rgba(255,255,255,.88);
+      filter: blur(.2px);
+    }
+    .cloud::before, .cloud::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: inherit;
+    }
+    .cloud::before { width: 58px; height: 58px; left: 18px; bottom: 8px; }
+    .cloud::after { width: 74px; height: 74px; right: 8px; bottom: 2px; }
+    .cloud.one { left: 7%; top: 16%; transform: scale(.85); }
+    .cloud.two { right: 19%; top: 28%; transform: scale(.55); opacity: .85; }
+
+    .ground {
+      position: fixed;
+      left: -5%;
+      bottom: -75px;
+      width: 110%;
+      height: 250px;
+      border-radius: 50% 50% 0 0;
+      background:
+        repeating-linear-gradient(35deg, transparent 0 18px, rgba(78,151,67,.12) 19px 21px),
+        #75bd60;
+    }
+
+    .game {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr 280px;
+      align-items: center;
+      padding: 24px 5vw;
+    }
+
+    .panel {
+      background: rgba(255, 248, 218, .93);
+      border: 4px solid var(--ink);
+      border-radius: 22px;
+      box-shadow: 7px 7px 0 rgba(59,42,31,.18);
+      padding: 18px;
+    }
+
+    .title {
+      margin: 0 0 14px;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 1.05;
+      text-align: center;
+      color: #e68a20;
+      text-shadow: 2px 2px 0 #fff;
+      transform: rotate(-2deg);
+    }
+
+    .counter {
+      text-align: center;
+      font-weight: 900;
+    }
+    .counter strong {
+      display: block;
+      font-size: 58px;
+      line-height: 1;
+      color: #d96924;
+    }
+
+    .stage {
+      height: min(620px, 74vh);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .sip-progress {
+      width: min(360px, 70vw);
+      height: 18px;
+      margin-bottom: 18px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 4px 4px 0 rgba(59,42,31,.12);
+    }
+    .sip-progress div {
+      height: 100%;
+      width: 0%;
+      background: repeating-linear-gradient(135deg, #f6b02d 0 12px, #ffd84a 12px 24px);
+      transition: width .16s ease;
+    }
+
+    .bottle-wrap {
+      position: relative;
+      display: grid;
+      place-items: center;
+      height: 430px;
+      width: 230px;
+    }
+
+    .bottle {
+      position: relative;
+      width: 178px;
+      height: 386px;
+      border: 7px solid var(--ink);
+      border-radius: 34px 34px 48px 48px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow:
+        inset 14px 0 0 rgba(255,255,255,.8),
+        10px 12px 0 rgba(59,42,31,.14);
+      cursor: pointer;
+      transition: transform .08s ease;
+    }
+    .bottle:active, .bottle.sipping { transform: scale(.94) rotate(-2deg); }
+
+    .cap {
+      position: absolute;
+      z-index: 3;
+      top: -42px;
+      left: 50%;
+      width: 84px;
+      height: 52px;
+      transform: translateX(-50%);
+      border: 7px solid var(--ink);
+      border-radius: 16px 16px 8px 8px;
+      background: repeating-linear-gradient(90deg, #3e9eb0 0 8px, #73bfd0 8px 14px);
+    }
+
+    .tea {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      height: calc(100% - 16px);
+      border-radius: 23px 23px 38px 38px;
+      background: linear-gradient(180deg, rgba(190,106,45,.86), rgba(123,61,28,.96));
+      clip-path: polygon(0 8%, 100% 5%, 100% 100%, 0 100%);
+      transition: height .28s ease, opacity .25s ease;
+    }
+    .tea::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      top: 12%;
+      width: 24%;
+      height: 74%;
+      border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      transform: rotate(8deg);
+    }
+
+    .label {
+      position: absolute;
+      z-index: 4;
+      left: -24px;
+      right: -24px;
+      top: 116px;
+      height: 155px;
+      display: grid;
+      place-items: center;
+      border: 6px solid var(--ink);
+      border-radius: 20px;
+      background: var(--yellow);
+      box-shadow: 4px 5px 0 rgba(59,42,31,.12);
+      text-align: center;
+      transition: opacity .25s ease;
+    }
+    .label-brand {
+      font-size: 35px;
+      font-weight: 1000;
+      letter-spacing: 2px;
+      line-height: .9;
+      color: #b62d22;
+      text-shadow: 1px 1px 0 #fff;
+    }
+    .label-brand small {
+      display: block;
+      margin-top: 10px;
+      color: #22715a;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    .bottle.empty .tea { height: 7px; opacity: .35; }
+    .bottle.empty .label { filter: grayscale(.15); opacity: .72; }
+
+    .sip-count {
+      position: absolute;
+      right: -70px;
+      top: 160px;
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      background: #fff;
+      font-size: 25px;
+      font-weight: 900;
+      box-shadow: 4px 4px 0 rgba(59,42,31,.12);
+    }
+
+    .right-panel {
+      text-align: center;
+    }
+    .right-panel h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+    .bottle-count {
+      font-size: 56px;
+      line-height: 1;
+      color: #e36e25;
+      font-weight: 1000;
+    }
+    .next-button {
+      width: 100%;
+      margin-top: 16px;
+      border: 4px solid var(--ink);
+      border-radius: 14px;
+      background: #76c96b;
+      color: var(--ink);
+      padding: 12px 8px;
+      font: 900 17px "Microsoft JhengHei", sans-serif;
+      box-shadow: 0 6px 0 #3f8b3f;
+      cursor: pointer;
+      transition: transform .08s, box-shadow .08s;
+    }
+    .next-button:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #3f8b3f;
+    }
+    .next-button:disabled {
+      background: #ccc;
+      box-shadow: 0 6px 0 #999;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      margin: 12px 0 0;
+      min-height: 24px;
+      font-weight: 900;
+      color: #8a451d;
+      text-align: center;
+    }
+
+    .particle {
+      position: fixed;
+      z-index: 20;
+      pointer-events: none;
+      font-size: 24px;
+      font-weight: 1000;
+      animation: floatUp .65s ease-out forwards;
+      text-shadow: 2px 2px 0 #fff;
+    }
+    @keyframes floatUp {
+      from { transform: translate(-50%, 0) scale(.8) rotate(-8deg); opacity: 1; }
+      to { transform: translate(-50%, -75px) scale(1.25) rotate(8deg); opacity: 0; }
+    }
+
+    .shake { animation: shake .24s ease; }
+    @keyframes shake {
+      25% { transform: translateX(-7px) rotate(-3deg); }
+      75% { transform: translateX(7px) rotate(3deg); }
+    }
+
+    @media (max-width: 860px) {
+      body { overflow-y: auto; }
+      .game {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .title { display: none; }
+      .panel { width: min(420px, 92vw); justify-self: center; }
+      .left-panel { order: 1; padding: 8px 14px; }
+      .left-panel .counter strong { display: inline; font-size: 38px; }
+      .left-panel .counter { font-size: 15px; }
+      .stage { order: 2; height: 480px; }
+      .right-panel { order: 3; padding: 10px 14px; }
+      .right-panel h2 { display: inline; margin-right: 8px; }
+      .bottle-count { display: inline; font-size: 38px; }
+      .next-button { width: 160px; margin: 0 0 0 12px; }
+      .bottle-wrap { height: 350px; transform: scale(.82); }
+      .sip-progress { margin-bottom: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="cloud one"></div>
+  <div class="cloud two"></div>
+  <div class="ground"></div>
+
+  <main class="game">
+    <section class="panel left-panel">
+      <h1 class="title">瘋狂喝麥香紅茶</h1>
+      <div class="counter">
+        喝了幾口
+        <strong id="totalSips">0</strong>
+      </div>
+    </section>
+
+    <section class="stage" id="stage">
+      <div class="sip-progress" aria-label="本瓶飲用進度">
+        <div id="progress"></div>
+      </div>
+
+      <div class="bottle-wrap">
+        <div class="bottle" id="bottle" role="button" tabindex="0" aria-label="點擊喝一口紅茶">
+          <div class="cap"></div>
+          <div class="tea"></div>
+          <div class="label">
+            <div class="label-brand">麥香紅茶
+              <small>夠茶 麥香濃郁</small>
+            </div>
+          </div>
+          <div class="sip-count" id="sipCount">0/10</div>
+        </div>
+      </div>
+
+      <p class="hint" id="hint">瘋狂點瓶子喝紅茶！</p>
+    </section>
+
+    <aside class="panel right-panel">
+      <h2>已喝完</h2>
+      <div class="bottle-count" id="bottleCount">0</div>
+      <div>瓶紅茶</div>
+      <button class="next-button" id="nextButton" disabled>按空白鍵開下一瓶</button>
+    </aside>
+  </main>
+
+  <script>
+    const bottle = document.getElementById("bottle");
+    const progress = document.getElementById("progress");
+    const sipCount = document.getElementById("sipCount");
+    const totalSips = document.getElementById("totalSips");
+    const bottleCount = document.getElementById("bottleCount");
+    const nextButton = document.getElementById("nextButton");
+    const hint = document.getElementById("hint");
+    const stage = document.getElementById("stage");
+
+    let currentSips = 0;
+    let total = 0;
+    let finishedBottles = 0;
+    let isEmpty = false;
+
+    const sipWords = ["好喝～", "啊～", "再來！", "麥香！", "爽！", "噗～", "甘甘的", "好爽！"];
+
+    function addParticle(x, y) {
+      const particle = document.createElement("div");
+      particle.className = "particle";
+      particle.textContent = sipWords[Math.floor(Math.random() * sipWords.length)];
+      particle.style.left = x + "px";
+      particle.style.top = y + "px";
+      document.body.appendChild(particle);
+      particle.addEventListener("animationend", () => particle.remove());
+    }
+
+    function drink(event) {
+      if (isEmpty) {
+        bottle.classList.add("shake");
+        setTimeout(() => bottle.classList.remove("shake"), 250);
+        hint.textContent = "這瓶已經空了！按空白鍵開下一瓶";
+        return;
+      }
+
+      currentSips++;
+      total++;
+      sipCount.textContent = currentSips + "/10";
+      totalSips.textContent = total;
+      progress.style.width = (currentSips * 10) + "%";
+
+      bottle.classList.add("sipping");
+      setTimeout(() => bottle.classList.remove("sipping"), 90);
+
+      const rect = bottle.getBoundingClientRect();
+      const x = event && event.clientX ? event.clientX : rect.left + rect.width / 2;
+      const y = event && event.clientY ? event.clientY : rect.top + rect.height / 2;
+      addParticle(x, y);
+
+      if (currentSips >= 10) {
+        isEmpty = true;
+        bottle.classList.add("empty");
+        finishedBottles++;
+        bottleCount.textContent = finishedBottles;
+        nextButton.disabled = false;
+        hint.textContent = "喝完了！按空白鍵開下一瓶";
+      }
+    }
+
+    function nextBottle() {
+      if (!isEmpty) return;
+
+      currentSips = 0;
+      isEmpty = false;
+      bottle.classList.remove("empty");
+      sipCount.textContent = "0/10";
+      progress.style.width = "0%";
+      nextButton.disabled = true;
+      hint.textContent = "新的一瓶，繼續狂喝！";
+
+      bottle.classList.add("shake");
+      setTimeout(() => bottle.classList.remove("shake"), 250);
+    }
+
+    bottle.addEventListener("pointerdown", drink);
+    bottle.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (isEmpty) nextBottle();
+        else drink();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (isEmpty) nextBottle();
+      }
+    });
+
+    nextButton.addEventListener("click", nextBottle);
+  </script>
+</body>
+</html>
